@@ -7,3 +7,4 @@ edition = "2021"
 current = { git = "https://github.com/SalsaGal/current" }
 glam = "0.21.3"
 image = "0.24.3"
+winit = "0.26.1"
