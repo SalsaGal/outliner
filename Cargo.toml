@@ -1,0 +1,9 @@
+[package]
+name = "outliner"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+current = { git = "https://github.com/SalsaGal/current" }
+glam = "0.21.3"
+image = "0.24.3"
