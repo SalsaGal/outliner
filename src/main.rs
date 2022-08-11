@@ -9,20 +9,22 @@ fn main() {
 
 struct Outliner {
     original_image: Option<(DynamicImage, Sprite)>,
+    out_image: Option<(DynamicImage, Sprite)>,
 }
 
 impl Game for Outliner {
     fn init(data: &mut GameData) -> Self {
         data.set_resizable(true);
         data.set_title("Outliner");
+        data.graphics.frame_size = Some((2.0, 2.0).into());
 
         let original_image = match std::env::args().nth(1) {
             Some(path) => {
                 let image = image::open(path).unwrap();
-                let (width, height) = image.dimensions();
                 let id = data.graphics.load_image(&image, sprite::Filter::Nearest);
-                let sprite = Sprite::new_texture_rect(data.graphics, id)
-                    .with_transform(Transform::scale((width as f32, height as f32).into()));
+                let sprite = Sprite::new_texture_rect(data.graphics, id).with_transform(
+                    Transform::scale((1.0, 1.0).into()).with_translation((-0.5, 0.0, 0.0).into())
+                );
                 Some((image, sprite))
             }
             None => None,
@@ -30,6 +32,7 @@ impl Game for Outliner {
 
         Self {
             original_image,
+            out_image: None,
         }
     }
 
@@ -47,10 +50,8 @@ impl Game for Outliner {
         {
             match image::open(path) {
                 Ok(image) => {
-                    let (width, height) = image.dimensions();
                     let id = data.graphics.load_image(&image, sprite::Filter::Nearest);
-                    let sprite = Sprite::new_texture_rect(data.graphics, id)
-                        .with_transform(Transform::scale((width as f32, height as f32).into()));
+                    let sprite = Sprite::new_texture_rect(data.graphics, id);
                     self.original_image = Some((image, sprite));
                 }
                 Err(err) => eprintln!("Error: {err}"),
