@@ -1,6 +1,6 @@
 use current::sprite::{Sprite, Transform};
 use current::*;
-use image::DynamicImage;
+use image::{DynamicImage, GenericImageView};
 use winit::event::{Event, WindowEvent};
 
 fn main() {
@@ -35,9 +35,10 @@ impl Game for Outliner {
         {
             match image::open(path) {
                 Ok(image) => {
+                    let (width, height) = image.dimensions();
                     let id = data.graphics.load_image(&image, sprite::Filter::Nearest);
                     let sprite = Sprite::new_texture_rect(data.graphics, id)
-                        .with_transform(Transform::scale((512.0, 512.0).into()));
+                        .with_transform(Transform::scale((width as f32, height as f32).into()));
                     self.original_image = Some((image, sprite));
                 }
                 Err(err) => eprintln!("Error: {err}"),
