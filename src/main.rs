@@ -1,3 +1,4 @@
+use current::sprite::{Sprite, Transform};
 use current::*;
 use image::DynamicImage;
 use winit::event::{Event, WindowEvent};
@@ -7,7 +8,7 @@ fn main() {
 }
 
 struct Outliner {
-    original_image: Option<DynamicImage>,
+    original_image: Option<(DynamicImage, Sprite)>,
 }
 
 impl Game for Outliner {
@@ -20,12 +21,25 @@ impl Game for Outliner {
         }
     }
 
-    fn handle_event(&mut self, _: &mut GameData, event: &Event<()>) {
-        if let Event::WindowEvent { event: WindowEvent::DroppedFile(path), .. }  = event {
+    fn render<'a>(&'a mut self, mut frame: graphics::Frame<'a>) {
+        if let Some((_, sprite)) = &self.original_image {
+            sprite.render_to(&mut frame);
+        }
+    }
+
+    fn handle_event(&mut self, data: &mut GameData, event: &Event<()>) {
+        if let Event::WindowEvent {
+            event: WindowEvent::DroppedFile(path),
+            ..
+        } = event
+        {
             match image::open(path) {
                 Ok(image) => {
-                    self.original_image = Some(image);
-                },
+                    let id = data.graphics.load_image(&image, sprite::Filter::Nearest);
+                    let sprite = Sprite::new_texture_rect(data.graphics, id)
+                        .with_transform(Transform::scale((512.0, 512.0).into()));
+                    self.original_image = Some((image, sprite));
+                }
                 Err(err) => eprintln!("Error: {err}"),
             }
         }
