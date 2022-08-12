@@ -1,5 +1,6 @@
-use current::sprite::{Sprite, Transform, RectTextureMap};
+use current::sprite::{RectTextureMap, Sprite, Transform};
 use current::*;
+use glam::Vec2;
 use image::DynamicImage;
 use winit::event::{Event, WindowEvent};
 
@@ -34,13 +35,15 @@ impl Game for Outliner {
             &image::load_from_memory(include_bytes!("background.png")).unwrap(),
             sprite::Filter::Nearest,
         );
+        let background_scale = data.graphics.get_frame_size();
 
         Self {
             background: Sprite::new_texture_rect_mapped(
                 data.graphics,
                 background_id,
-                RectTextureMap::from_grid((0.125, 0.125).into(), (0.0, 0.0).into()),
-            ).with_transform(Transform::scale(data.graphics.get_frame_size())),
+                RectTextureMap::from_grid(Vec2::new(1.0, 1.0) / 16.0, (0.0, 0.0).into()),
+            )
+            .with_transform(Transform::scale(background_scale).with_z(-1.0)),
             original_image: match std::env::args().nth(1) {
                 Some(path) => get_original_image(data, &path),
                 None => None,
@@ -56,12 +59,18 @@ impl Game for Outliner {
     }
 
     fn handle_event(&mut self, data: &mut GameData, event: &Event<()>) {
-        if let Event::WindowEvent {
-            event: WindowEvent::DroppedFile(path),
-            ..
-        } = event
-        {
-            self.original_image = get_original_image(data, path.to_str().unwrap());
+        if let Event::WindowEvent { event, .. } = event {
+            match event {
+                WindowEvent::DroppedFile(path) => {
+                    self.original_image = get_original_image(data, path.to_str().unwrap())
+                }
+                WindowEvent::Resized(size) => {
+                    let scale = Vec2::new(size.width as f32, size.height as f32);
+                    self.background
+                        .set_transform(Transform::scale(scale).with_z(-1.0));
+                }
+                _ => {}
+            }
         }
     }
 }
