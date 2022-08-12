@@ -1,5 +1,5 @@
 [default]
-cargo run -- test.png
+cargo run -- sussy.png
 
 [check]
 cargo fmt
