@@ -16,9 +16,11 @@ struct Outliner {
 fn get_original_image(data: &mut GameData, path: &str) -> Option<(DynamicImage, Sprite)> {
     match image::open(path) {
         Ok(image) => {
+            let position = -(image.width() as f32) / 2.0;
             let id = data.graphics.load_image(&image, sprite::Filter::Nearest);
             let sprite = Sprite::new_texture_rect(data.graphics, id).with_transform(
-                Transform::scale((image.width() as f32, image.height() as f32).into()),
+                Transform::scale((image.width() as f32, image.height() as f32).into())
+                    .with_translation((position, 0.0, 0.0).into()),
             );
             Some((image, sprite))
         }
